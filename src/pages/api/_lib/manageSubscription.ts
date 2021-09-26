@@ -2,47 +2,62 @@ import { query as q } from "faunadb";
 import { fauna } from "../../../services/fauna";
 import { stripe } from "../../../services/stripe";
 
+interface User {
+  ref: any;
+}
+
 export async function saveSubscription(
   subscriptionId: string,
   customerId: string,
+  createAction = false,
 ) {
-  // Buscar o usuário no banco do FaunaDB com o ID {customerId}
-  // Salvar os dados da subscription no FaunaDB
 
-  const userRef = await fauna.query(
-    q.Get(
-      q.Select(
-        'ref',
+  const user = await fauna.query<User>(
+      q.Get(
         q.Match(
           q.Index('user_by_customer_stripe_id'),
           customerId
         )
       )
-    )
-  );
+    );
 
-  console.log(userRef);
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-  console.log(subscription);
-
   const subscriptionData = {
     id: subscription.id,
-    userId: userRef,
+    userId: user.ref,
     status: subscription.status,
     price_id: subscription.items.data[0].price.id,
   };
 
-  console.log(subscriptionData);
+  if (createAction) {
+    await fauna.query(
+      q.Create(
+        q.Collection('subscriptions'),
+        {
+          data: subscriptionData,
+        }
+      )
+    );
+  } else {
+    await fauna.query(
+      q.Replace(
+        q.Select(
+          "ref",
+          q.Get(
+            q.Match(
+              q.Index('subscription_by_id'),
+              subscriptionId
+            )
+          )
+        ),
+        {
+          data: subscriptionData,
+        }
+      )
+    );
+  }
 
-  await fauna.query(
-    q.Create(
-      q.Collection('subscriptions'),
-      {
-        data: subscriptionData,
-      }
-    )
-  );
 
 }
