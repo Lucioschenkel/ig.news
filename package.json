@@ -1,4 +1,8 @@
 {
+  "author": {
+    "name": "Lucio Schenkel",
+    "email": "contato@lucioschenkel.com"
+  },
   "name": "ignews",
   "version": "0.1.0",
   "private": true,
