@@ -18,7 +18,7 @@ export default NextAuth({
           email: profile.email,
           image: profile.avatar_url,
         } as Awaitable<User & { id: string }>;
-      }
+      },
     }),
   ],
   callbacks: {
@@ -30,7 +30,7 @@ export default NextAuth({
               q.Match(
                 q.Index('subscription_by_user_ref'),
                 q.Select(
-                  "ref",
+                  'ref',
                   q.Get(
                     q.Match(
                       q.Index('user_by_email'),
@@ -39,14 +39,10 @@ export default NextAuth({
                   )
                 )
               ),
-              q.Match(
-                q.Index('subscription_by_status'),
-                "active"
-              )
+              q.Match(q.Index('subscription_by_status'), 'active'),
             ])
           )
-        )
-
+        );
 
         return {
           ...session,
@@ -56,7 +52,7 @@ export default NextAuth({
         return {
           ...session,
           activeSubscription: null,
-        }
+        };
       }
     },
     async signIn(user, account, profile) {
@@ -66,30 +62,18 @@ export default NextAuth({
         await fauna.query(
           q.If(
             q.Not(
-              q.Exists(
-                q.Match(
-                  q.Index('user_by_email'),
-                  q.Casefold(email)
-                )
-              )
+              q.Exists(q.Match(q.Index('user_by_email'), q.Casefold(email)))
             ),
-            q.Create(
-              q.Collection('users'),
-              { data: { email } }
-            ),
-            q.Get(
-              q.Match(
-                q.Index('user_by_email'),
-                q.Casefold(email)
-              )
-            )
+            q.Create(q.Collection('users'), { data: { email } }),
+            q.Get(q.Match(q.Index('user_by_email'), q.Casefold(email)))
           )
         );
 
         return true;
-      } catch {
+      } catch (error) {
+        console.log(error);
         return false;
       }
-    }
-  }
+    },
+  },
 });
