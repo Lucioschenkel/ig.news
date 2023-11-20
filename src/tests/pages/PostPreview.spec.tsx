@@ -26,7 +26,9 @@ describe('Post preview page', () => {
 
     expect(screen.getByText('My new post')).toBeInTheDocument();
     expect(screen.getByText('Test')).toBeInTheDocument();
-    expect(screen.getByText('Wanna continue reading?')).toBeInTheDocument();
+    expect(
+      screen.getByText('Do you want to continue reading?')
+    ).toBeInTheDocument();
   });
 
   it('redirects user to full post when user is subscribed', async () => {

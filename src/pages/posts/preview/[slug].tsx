@@ -11,7 +11,7 @@ import { getPrismicClient } from '../../../services/prismic';
 import styles from '../post.module.scss';
 
 interface PostPreviewProps {
-  post: {
+  readonly post: {
     slug: string;
     title: string;
     content: string;
@@ -44,7 +44,7 @@ export default function PostPreview({ post }: PostPreviewProps) {
           />
 
           <div className={styles.continueReading}>
-            Do you want continue reading?
+            Do you want to continue reading?
             <Link href="/">
               <a>Subscribe now 🤗</a>
             </Link>
@@ -67,7 +67,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   const prismic = getPrismicClient();
 
-  const response = await prismic.getByUID('post', String(slug), {});
+  const response = await prismic.getByUID<{
+    title: string;
+    content: any[];
+  }>('post', String(slug), {});
 
   const post = {
     slug,

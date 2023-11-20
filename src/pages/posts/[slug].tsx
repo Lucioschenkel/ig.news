@@ -7,7 +7,7 @@ import { getPrismicClient } from '../../services/prismic';
 import styles from './post.module.scss';
 
 interface PostProps {
-  post: {
+  readonly post: {
     slug: string;
     title: string;
     content: string;
@@ -53,7 +53,10 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   const prismic = getPrismicClient(req);
 
-  const response = await prismic.getByUID('post', String(slug), {});
+  const response = await prismic.getByUID<{
+    title: string;
+    content: any[];
+  }>('post', String(slug), {});
 
   const post = {
     slug,
